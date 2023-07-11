@@ -1,0 +1,32 @@
+body {
+  background-color: #151515;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 80%;
+  margin: auto;
+}
+
+h1 {
+  color: #fff;
+  text-align: center;
+}
+
+img {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  margin-bottom: 20px;
+}
+
+p {
+  line-height: 1.5;
+  margin: 10px 0;
+}
+
+p b {
+  color: #ff6347;
+}
