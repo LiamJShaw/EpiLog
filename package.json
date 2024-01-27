@@ -1,25 +1,32 @@
 {
   "name": "my-tv-list",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "node ./bin/www",
-    "devstart": "nodemon ./bin/www",
-    "serverstart": "DEBUG=express-locallibrary-tutorial:* npm run devstart"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiamJShaw/my-tv-list.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LiamJShaw/my-tv-list/issues"
+  },
+  "homepage": "https://github.com/LiamJShaw/my-tv-list#readme",
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
+    "axios": "^1.6.7",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.1",
     "express": "^4.18.2",
-    "express-async-handler": "^1.2.0",
-    "express-validator": "^7.0.1",
-    "http-errors": "~1.6.3",
-    "jade": "^0.29.0",
-    "mongodb": "^6.1.0",
-    "mongoose": "^7.5.2",
-    "morgan": "~1.9.1"
+    "mongoose": "^8.1.1",
+    "moviedb-promise": "^4.0.3",
+    "nodemon": "^3.0.3"
   },
   "devDependencies": {
-    "dotenv": "^16.3.1"
+    "@flydotio/dockerfile": "^0.5.0"
   }
 }
