@@ -1,18 +1,28 @@
 const mongoose = require('mongoose');
 
 const filmSchema = new mongoose.Schema({
-    tmdbId: { 
-        type: String, 
-        required: true, 
-        unique: true, 
+    tmdbId: {
+        type: Number,
+        required: true,
+        unique: true,
     },
-    title: { 
-        type: String, 
-        required: true 
-    }
+    title: {
+        type: String,
+        required: true,
+    },
+    backdropPath: String,
+    imdbId: String,
+    originalLanguage: String,
+    overview: String,
+    posterPath: String,
+    releaseDate: Date,
+    runtime: Number,
+    status: String,
+    tagline: String,
 });
 
-// Indexing the TMTB ID for efficient querying
-filmSchema.index({ id: 1 }, { unique: true });
+filmSchema.index({ tmdbId: 1 }, { unique: true });
 
-module.exports = mongoose.model('Film', filmSchema);
+const Film = mongoose.models.Film || mongoose.model('Film', filmSchema);
+
+module.exports = Film;

@@ -13,31 +13,9 @@ const tvShowSchema = new mongoose.Schema({
     genres: [String],
     averageRuntime: Number,
     premiered: Date,
-    image: {
-        medium: String
-    },
+    image: String,
     status: String,
-    officialSite: String,
     summary: String,
-    schedule: {
-        time: String,
-        days: [String]
-    },
-    language: String,
-    network: {
-        name: String,
-        country: {
-            name: String,
-            code: String,
-            timezone: String
-        },
-        officialSite: String
-    },
-    externals: {
-        tvrage: Number,
-        thetvdb: Number,
-        imdb: String
-    },
     updated: Number
 });
 
