@@ -19,6 +19,7 @@ const filmSchema = new mongoose.Schema({
     runtime: Number,
     status: String,
     tagline: String,
+    updated: Date
 });
 
 filmSchema.index({ tmdbId: 1 }, { unique: true });

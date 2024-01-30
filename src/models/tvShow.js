@@ -16,7 +16,8 @@ const tvShowSchema = new mongoose.Schema({
     image: String,
     status: String,
     summary: String,
-    updated: Number
+    updated: Number,
+    language: String,
 });
 
 tvShowSchema.index({ tvMazeId: 1 }, { unique: true });

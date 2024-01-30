@@ -6,90 +6,11 @@ const { MovieDb } = require('moviedb-promise')
 const moviedb = new MovieDb(process.env.TMDB_APIKEY)
 
 const mongoose = require('mongoose');
-const Film = require('./src/models/film');
-const TVShow = require('./src/models/tvShow');
+const Film = require('../src/models/film');
+const TVShow = require('../src/models/tvShow');
 
 mongoose.connect(process.env.MONGODB_URI);
 
-// TV Shows
-
-async function fetchInitialTVData() {
-    try {
-        let page = 0; // Start from page 0 or the last page you've processed
-        let hasMoreData = true;
-
-        while (hasMoreData) {
-            const response = await axios.get(`https://api.tvmaze.com/shows?page=${page}`);
-            const tvShows = response.data;
-
-            if (tvShows.length === 0) {
-                hasMoreData = false;
-            } else {
-                for (const show of tvShows) {
-                    const showData = {
-                        tvMazeId: show.id,
-                        name: show.name,
-                        genres: show.genres,
-                        averageRuntime: show.averageRuntime || show.runtime,
-                        premiered: new Date(show.premiered),
-                        image: show.image ? show.image.medium : null,
-                        status: show.status,
-                        summary: show.summary,
-                        updated: Date.now()
-                    };
-
-                    console.log(show.name, " updated")
-
-                    // Update existing document or create a new one
-                    await TVShow.findOneAndUpdate({ tvMazeId: show.id }, showData, { upsert: true });
-                }
-
-                console.log("Page: ", page);
-                page++;
-            }
-        }
-
-        console.log('TV data fetched and stored successfully');
-    } catch (error) {
-        if (error.response && error.response.status === 404) {
-            console.log('Reached the end of TV show data.');
-        } else {
-            console.error('Error fetching and storing TV data:', error);
-        }
-    }
-}
-
-
-async function updateTVShows() {
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const showsToUpdate = await TVShow.find({ updated: { $lt: oneWeekAgo } });
-
-    let showsUpdated = 0;
-  
-    for (const show of showsToUpdate) {
-      // Fetch updated data from TVMaze API
-      const response = await axios.get(`https://api.tvmaze.com/shows/${show.tvMazeId}`);
-      const updatedData = response.data;
-  
-      showsUpdated++;
-
-      // Update show in database
-      await TVShow.updateOne({ tvMazeId: show.tvMazeId }, { $set: updatedData });
-    }
-
-    console.log(showsUpdated, "shows updated")
-  
-    mongoose.connection.close();
-  }
-
-// fetchInitialTVData();
-
-
-
-
-
-
-// Films
 let genreMap = {};
 
 const fetchGenreMap = async () => {
@@ -135,13 +56,14 @@ const updateFilmDetails = async () => {
                 ...film.toObject(),
                 backdropPath: imageConfig.base_url + imageConfig.backdrop_sizes[2] + details.backdrop_path,
                 imdbId: details.imdb_id,
-                originalLanguage: details.original_language,
+                language: details.original_language,
                 overview: details.overview,
                 posterPath: imageConfig.base_url + imageConfig.poster_sizes[4] + details.poster_path,
                 releaseDate: new Date(details.release_date),
                 runtime: details.runtime,
                 status: details.status,
                 tagline: details.tagline,
+                updated: Date.now()
             };
 
             console.log(updatedFilm);
@@ -170,7 +92,7 @@ const fetchMoviesByYear = async (startYear, endYear) => {
                 try {
                     const response = await moviedb.discoverMovie({
                         primary_release_year: year,
-                        with_original_language: 'en', // Fetch only English language movies
+                        with_original_language: 'en',
                         page: page,
                         include_adult: false
                     });
@@ -206,6 +128,15 @@ const fetchMoviesByYear = async (startYear, endYear) => {
                                 genres: movie.genre_ids.map(id => genreMap[id]).filter(name => name), // Map genre IDs to names
                                 releaseDate: releaseDate, // Storing release date
                                 language: movie.original_language, // Storing language
+                                backdropPath: imageConfig.base_url + imageConfig.backdrop_sizes[2] + details.backdrop_path,
+                                imdbId: details.imdb_id,
+                                overview: details.overview,
+                                posterPath: imageConfig.base_url + imageConfig.poster_sizes[4] + details.poster_path,
+                                releaseDate: new Date(details.release_date),
+                                runtime: details.runtime,
+                                status: details.status,
+                                tagline: details.tagline,
+                                updated: Date.now()
                             });
                             await newFilm.save();
                         }
@@ -236,12 +167,8 @@ const fetchMoviesByYear = async (startYear, endYear) => {
     }
 };
 
-
 // Run this to get the intitial data into the database
 // fetchMoviesByYear(2024, 1940);
 
-// Run this to update with further info
-updateFilmDetails();
-
-// No updated timestamp in the films script. Whoops. Can fix it with:
-// db.films.updateMany({}, { $set: { updated: new Date() } }); in mongosh
+// Run this to update info
+// updateFilmDetails();
