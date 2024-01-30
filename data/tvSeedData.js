@@ -6,8 +6,7 @@ const { MovieDb } = require('moviedb-promise')
 const moviedb = new MovieDb(process.env.TMDB_APIKEY)
 
 const mongoose = require('mongoose');
-const Film = require('./src/models/film');
-const TVShow = require('./src/models/tvShow');
+const TVShow = require('../src/models/tvShow');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -130,6 +129,42 @@ async function updateTVShowsLanguage() {
     mongoose.connection.close();
 }
 
+async function updateTVShowsIMDBId() {
+    const allShows = await TVShow.find({ imdbId: { $exists: false } }); // Find shows without an IMDB ID
+
+    let showsUpdated = 0;
+
+    for (const show of allShows) {
+        try {
+            // Fetch updated data from TVMaze API
+            const response = await axios.get(`https://api.tvmaze.com/shows/${show.tvMazeId}`);
+            const updatedData = response.data;
+
+            // Extract the IMDB ID
+            const imdbId = updatedData.externals && updatedData.externals.imdb;
+
+            // Update the show in the database if IMDB ID is available
+            if (imdbId) {
+                await TVShow.updateOne({ tvMazeId: show.tvMazeId }, { $set: { imdbId: imdbId } });
+                showsUpdated++;
+                console.log(`Successfully updated show ${show.tvMazeId} with IMDB ID: ${imdbId}`);
+            } else {
+                console.log(`No IMDB ID available for show ${show.tvMazeId}`);
+            }
+
+            // Delay to avoid hitting the rate limit
+            // await new Promise(resolve => setTimeout(resolve, 100));
+
+        } catch (error) {
+            console.error(`Error updating IMDB ID for show with ID ${show.tvMazeId}: ${error}`);
+        }
+    }
+
+    console.log(`${showsUpdated} shows updated with IMDB ID information`);
+
+    mongoose.connection.close();
+}
+
 // Get all the data you need to seed the database
 // fetchInitialTVData();
 
@@ -138,3 +173,4 @@ async function updateTVShowsLanguage() {
 
 // Add a field that doesn't exist already in the DB, ex: language
 // updateTVShowsLanguage();
+updateTVShowsIMDBId();

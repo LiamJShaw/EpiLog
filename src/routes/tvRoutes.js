@@ -175,7 +175,7 @@ router.get('/', async (req, res) => {
     let pageSize = parseInt(req.query.pageSize) || 10;
     const skip = (page - 1) * pageSize;
     const sortBy = req.query.sortBy || 'premiered';
-    const order = req.query.order === 'desc' ? -1 : 1;
+    const order = req.query.order === 'asc' ? 'asc' : 'desc';
     const genre = req.query.genre;
     const status = req.query.status;
 
@@ -183,7 +183,6 @@ router.get('/', async (req, res) => {
         pageSize = maxPageSize;
     }
 
-    // Build the query
     let query = {};
     if (genre) {
         query.genres = { $in: [genre] }; // Match any of the genres
@@ -196,7 +195,7 @@ router.get('/', async (req, res) => {
         const tvShows = await TVShow.find(query)
                                     .skip(skip)
                                     .limit(pageSize)
-                                    .sort({ [sortBy]: order });
+                                    .sort({ [sortBy]: order === 'desc' ? -1 : 1 });
         const totalItemCount = await TVShow.countDocuments(query);
         const totalPages = Math.ceil(totalItemCount / pageSize);
 
