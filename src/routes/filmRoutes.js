@@ -53,6 +53,20 @@ router.get('/search', async (req, res) => {
     }
 });
 
+router.get('/upcoming', async (req, res) => {
+    try {
+        const today = new Date();
+        const films = await Film.find({
+            releaseDate: { $gt: today }
+        })
+        .sort({ releaseDate: 1 }); // Sort by release date ascending
+
+        res.json(films);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
 // GET /api/films/:id
 // Fetch a specific film by its tmdbId
 router.get('/:id', async (req, res) => {

@@ -42,6 +42,7 @@ router.get('/search', async (req, res) => {
             .limit(pageSize);
 
         const totalItemCount = await TVShow.countDocuments(searchOptions);
+        const totalPages = Math.ceil(totalItemCount / pageSize); // Calculate totalPages here
 
         res.set('X-Page-Number', page.toString());
         res.set('X-Page-Size', pageSize.toString());
@@ -144,7 +145,7 @@ router.get('/:id/runtime', async (req, res) => {
     try {
         const tvShowId = req.params.id;
         
-        // Fetch all seasons for the given TV show ID from TVMaze API
+        // Fetch all seasons for the given ID from TVMaze API
         const seasonsResponse = await axios.get(`https://api.tvmaze.com/shows/${tvShowId}/seasons`);
         const seasons = seasonsResponse.data;
 
@@ -165,6 +166,47 @@ router.get('/:id/runtime', async (req, res) => {
         if (error.response && error.response.status === 404) {
             return res.status(404).send('TV show not found on TVMaze.');
         }
+        res.status(500).send(error.message);
+    }
+});
+
+// GET /api/tvshows/genre/:genreName
+router.get('/genre/:genreName', async (req, res) => {
+    const genreName = req.params.genreName;
+    const page = parseInt(req.query.page) || 1;
+    let pageSize = parseInt(req.query.pageSize) || 10;
+    const skip = (page - 1) * pageSize;
+
+    if (pageSize > maxPageSize) {
+        pageSize = maxPageSize;
+    }
+
+    // Capitalize the first letter of the genre to match the database format
+    const formattedGenreName = genreName.charAt(0).toUpperCase() + genreName.slice(1).toLowerCase();
+
+    try {
+        const tvShows = await TVShow.find({
+            genres: { 
+                $in: [formattedGenreName] // Use $in to match any element in the genres array
+            }
+        })
+        .skip(skip)
+        .limit(pageSize);
+
+        const totalItemCount = await TVShow.countDocuments({
+            genres: {
+                $in: [formattedGenreName]
+            }
+        });
+        const totalPages = Math.ceil(totalItemCount / pageSize);
+
+        res.set('X-Page-Number', page.toString());
+        res.set('X-Page-Size', pageSize.toString());
+        res.set('X-Total-Item-Count', totalItemCount.toString());
+        res.set('X-Total-Pages', totalPages.toString());
+
+        res.json(tvShows);
+    } catch (error) {
         res.status(500).send(error.message);
     }
 });
