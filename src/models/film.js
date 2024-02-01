@@ -26,6 +26,14 @@ const filmSchema = new mongoose.Schema({
     updated: Date
 });
 
+// Pre-save middleware to generate slug before saving
+filmSchema.pre('save', function(next) {
+    if (this.isModified('title')) {
+        this.slug = slugify(this.title, { lower: true, strict: true });
+    }
+    next();
+});
+
 filmSchema.index({ tmdbId: 1 }, { unique: true });
 
 const Film = mongoose.models.Film || mongoose.model('Film', filmSchema);
