@@ -2,9 +2,6 @@ require('dotenv').config();
 
 const axios = require('axios');
 
-const { MovieDb } = require('moviedb-promise')
-const moviedb = new MovieDb(process.env.TMDB_APIKEY)
-
 const mongoose = require('mongoose');
 const TVShow = require('../src/models/tvShow');
 
@@ -25,7 +22,7 @@ async function fetchInitialTVData() {
                 for (const show of tvShows) {
                     const showData = {
                         tvMazeId: show.id,
-                        name: show.name,
+                        title: show.name,
                         genres: show.genres,
                         averageRuntime: show.averageRuntime || show.runtime,
                         premiered: new Date(show.premiered),
@@ -70,7 +67,7 @@ async function updateTVShows() {
 
         const update = {
             tvMazeId: updatedData.id,
-            name: updatedData.name,
+            title: updatedData.name,
             genres: updatedData.genres,
             averageRuntime: updatedData.runtime,
             premiered: new Date(updatedData.premiered),

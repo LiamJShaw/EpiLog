@@ -7,7 +7,7 @@ const tvShowSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    name: {
+    title: {
         type: String,
         required: true
     },
@@ -28,8 +28,8 @@ const tvShowSchema = new mongoose.Schema({
 
 // Pre-save middleware to generate slug before saving
 tvShowSchema.pre('save', function(next) {
-    if (this.isModified('name')) {
-        this.slug = slugify(this.name, { lower: true, strict: true });
+    if (this.isModified('title')) {
+        this.slug = slugify(this.title, { lower: true, strict: true });
     }
     next();
 });

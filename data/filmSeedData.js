@@ -7,7 +7,6 @@ const moviedb = new MovieDb(process.env.TMDB_APIKEY)
 
 const mongoose = require('mongoose');
 const Film = require('../src/models/film');
-const TVShow = require('../src/models/tvShow');
 
 mongoose.connect(process.env.MONGODB_URI);
 
