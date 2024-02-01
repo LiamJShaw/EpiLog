@@ -16,8 +16,8 @@ app.use(bodyParser.json());
 mongoose.connect(process.env.MONGODB_URI);
 
 // Use routes
-app.use('/api/tvshows', tvRoutes);
-app.use('/api/films', filmRoutes);
+app.use('/api/tv', tvRoutes);
+app.use('/api/film', filmRoutes);
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

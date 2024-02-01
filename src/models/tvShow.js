@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const tvShowSchema = new mongoose.Schema({
     tvMazeId: {
@@ -10,6 +11,10 @@ const tvShowSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    slug: {
+        type: String,
+        required: true,
+    },
     genres: [String],
     averageRuntime: Number,
     premiered: Date,
@@ -19,6 +24,14 @@ const tvShowSchema = new mongoose.Schema({
     updated: Number,
     language: String,
     imdbId: String
+});
+
+// Pre-save middleware to generate slug before saving
+tvShowSchema.pre('save', function(next) {
+    if (this.isModified('name')) {
+        this.slug = slugify(this.name, { lower: true, strict: true });
+    }
+    next();
 });
 
 tvShowSchema.index({ tvMazeId: 1 }, { unique: true });

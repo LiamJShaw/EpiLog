@@ -56,21 +56,13 @@ router.get('/search', async (req, res) => {
     }
 });
 
-// GET /api/tvshows/:id
+// GET /api/tvshows/:id/
 router.get('/:id', async (req, res) => {
+    const { id, slug } = req.params;
+
     try {
-        const tvShowId = req.params.id;
-        const liveInfo = req.query.liveInfo === 'true';
-
-        if (liveInfo) {
-            // Fetch live information from the TVMaze API
-            const tvMazeResponse = await axios.get(`https://api.tvmaze.com/shows/${tvShowId}`);
-            const liveData = tvMazeResponse.data;
-            return res.json(liveData);
-        }
-
-        // Fetch information from the local database
-        const tvShow = await TVShow.findOne({ tvMazeId: tvShowId });
+        // Fetch information from the local database using the internal ID
+        const tvShow = await TVShow.findById(id);
 
         if (!tvShow) {
             return res.status(404).send('TV show not found.');
@@ -78,33 +70,29 @@ router.get('/:id', async (req, res) => {
 
         res.json(tvShow);
     } catch (error) {
-        if (error.response && error.response.status === 404) {
-            return res.status(404).send('TV show not found on TVMaze.');
-        }
         res.status(500).send(error.message);
     }
 });
-
 
 // GET /api/tvshows/:id/episodes
 // Fetch the number of episodes for a specific TV show
 router.get('/:id/episodes', async (req, res) => {
     try {
-        const tvShowId = req.params.id;
-        
+        const internalId = req.params.id;
+
+        const tvShow = await TVShow.findById(internalId);
+        if (!tvShow) {
+            return res.status(404).send('TV show not found.');
+        }
+
         // Fetch all episodes for the given TV show ID from TVMaze API
-        const response = await axios.get(`https://api.tvmaze.com/shows/${tvShowId}/episodes`);
+        const response = await axios.get(`https://api.tvmaze.com/shows/${tvShow.tvMazeId}/episodes`);
         const episodes = response.data;
 
-        // Count the number of episodes
-        const episodeCount = episodes.length;
-
-        // Return the episode count
-        res.json({ tvShowId, episodeCount });
+        // Return the episodes
+        res.json(episodes);
     } catch (error) {
-        if (error.response && error.response.status === 404) {
-            return res.status(404).send('TV show not found on TVMaze.');
-        }
+        console.error(error);
         res.status(500).send(error.message);
     }
 });
@@ -113,10 +101,15 @@ router.get('/:id/episodes', async (req, res) => {
 // Fetch seasons and episode information for a specific TV show
 router.get('/:id/seasons', async (req, res) => {
     try {
-        const tvShowId = req.params.id;
-        
+        const internalId = req.params.id;
+
+        const tvShow = await TVShow.findById(internalId);
+        if (!tvShow) {
+            return res.status(404).send('TV show not found.');
+        }
+
         // Fetch all seasons for the given TV show ID from TVMaze API
-        const seasonsResponse = await axios.get(`https://api.tvmaze.com/shows/${tvShowId}/seasons`);
+        const seasonsResponse = await axios.get(`https://api.tvmaze.com/shows/${tvShow.tvMazeId}/seasons`);
         const seasons = seasonsResponse.data;
 
         // For each season, fetch episodes
@@ -132,9 +125,7 @@ router.get('/:id/seasons', async (req, res) => {
         // Return the seasons with episode data
         res.json(seasonsWithEpisodes);
     } catch (error) {
-        if (error.response && error.response.status === 404) {
-            return res.status(404).send('TV show not found on TVMaze.');
-        }
+        console.error(error);
         res.status(500).send(error.message);
     }
 });
@@ -143,10 +134,15 @@ router.get('/:id/seasons', async (req, res) => {
 // Calculate and fetch total runtime for a specific TV show
 router.get('/:id/runtime', async (req, res) => {
     try {
-        const tvShowId = req.params.id;
-        
+        const internalId = req.params.id;
+
+        const tvShow = await TVShow.findById(internalId);
+        if (!tvShow) {
+            return res.status(404).send('TV show not found.');
+        }
+
         // Fetch all seasons for the given ID from TVMaze API
-        const seasonsResponse = await axios.get(`https://api.tvmaze.com/shows/${tvShowId}/seasons`);
+        const seasonsResponse = await axios.get(`https://api.tvmaze.com/shows/${tvShow.tvMazeId}/seasons`);
         const seasons = seasonsResponse.data;
 
         let runtime = 0;
@@ -163,9 +159,7 @@ router.get('/:id/runtime', async (req, res) => {
         // Return the total runtime
         res.json({ runtime });
     } catch (error) {
-        if (error.response && error.response.status === 404) {
-            return res.status(404).send('TV show not found on TVMaze.');
-        }
+        console.error(error);
         res.status(500).send(error.message);
     }
 });
@@ -181,13 +175,13 @@ router.get('/genre/:genreName', async (req, res) => {
         pageSize = maxPageSize;
     }
 
-    // Capitalize the first letter of the genre to match the database format
+    // Capitalise the first letter of the genre to match the database format
     const formattedGenreName = genreName.charAt(0).toUpperCase() + genreName.slice(1).toLowerCase();
 
     try {
         const tvShows = await TVShow.find({
             genres: { 
-                $in: [formattedGenreName] // Use $in to match any element in the genres array
+                $in: [formattedGenreName]
             }
         })
         .skip(skip)
