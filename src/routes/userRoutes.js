@@ -5,6 +5,10 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const TVShow = require('../models/tvShow');
+
+const mongoose = require('mongoose');
+const { ObjectId } = require('mongodb');
 
 const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
@@ -33,7 +37,6 @@ router.post('/register', async (req, res) => {
 
 // User login
 router.post('/login', passport.authenticate('local'), (req, res) => {
-    // User is authenticated at this point, generate a JWT
     const payload = { id: req.user.id, username: req.user.username };
     const token = jwt.sign(payload, process.env.EPILOG_SECRET, { expiresIn: '1h' }); // '1h' means the token expires in one hour
     
@@ -47,6 +50,33 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
+});
+
+// Add a TV show to the user's list
+router.post('/addshow', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    const userId = req.user.id;
+    const tvShowId = new ObjectId(req.body.tvShowId); // Convert string to ObjectId using MongoDB's ObjectId
+
+    try {
+        // Check if the TV Show exists
+        const tvShow = await TVShow.findById(tvShowId);
+        if (!tvShow) {
+            return res.status(404).json({ message: 'TV show not found!' });
+        }
+
+        // Find the user and update their tvList
+        const user = await User.findByIdAndUpdate(userId, {
+            $addToSet: { tvList: tvShowId }
+        }, { new: true }).populate('tvList'); // Populate to return updated list
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found!' });
+        }
+
+        res.status(200).json({ message: 'TV show added to your list!', tvList: user.tvList });
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
 });
 
 

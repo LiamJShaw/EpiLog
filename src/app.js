@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -18,7 +17,7 @@ const filmRoutes = require('./routes/filmRoutes');
 const port = process.env.PORT || 3000;
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json()); 
 
 const session = require('express-session');
 
