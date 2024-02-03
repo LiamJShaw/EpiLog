@@ -68,12 +68,11 @@ router.get('/upcoming', async (req, res) => {
 });
 
 // GET /api/films/:id
-// Fetch a specific film by its tmdbId
 router.get('/:id', async (req, res) => {
     try {
-        const filmId = req.params.id;
+        const id = req.params.id;
 
-        const film = await Film.findOne({ tmdbId: filmId });
+        const film = await Film.findById(id);
 
         if (!film) {
             return res.status(404).send('Film not found.');
@@ -91,8 +90,8 @@ router.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     let pageSize = parseInt(req.query.pageSize) || 10;
     const skip = (page - 1) * pageSize;
-    const sortBy = req.query.sortBy || 'releaseDate'; // Set default sortBy to 'releaseDate'
-    const order = req.query.order || 'desc';  // 'desc' as the default order
+    const sortBy = req.query.sortBy || 'releaseDate';
+    const order = req.query.order || 'desc'; 
 
     if (pageSize > maxPageSize) {
         pageSize = maxPageSize;

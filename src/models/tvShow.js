@@ -35,6 +35,7 @@ tvShowSchema.pre('save', function(next) {
 });
 
 tvShowSchema.index({ tvMazeId: 1 }, { unique: true });
+tvShowSchema.index({ title: 'text' });
 
 const TVShow = mongoose.model('TVShow', tvShowSchema);
 

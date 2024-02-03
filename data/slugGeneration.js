@@ -19,7 +19,7 @@ const addSlugsToTVShows = async () => {
             await tvShow.save();
             console.log(`Updated TV show: ${tvShow.title} with slug: ${tvShow.slug}`);
         } catch {
-            console.log("TV show", tvShow, "failed to slug!");
+            console.log("TV show", tvShow.title, "failed to slug!");
             continue;
         }
     }
@@ -35,13 +35,21 @@ const addSlugsToFilms = async () => {
         const slug = slugify(film.title, { lower: true, strict: true });
         film.slug = slug;
 
-        await film.save();
-        console.log(`Updated film: ${film.title} with slug: ${film.slug}`);
+        // await film.save();
+        // console.log(`Updated film: ${film.title} with slug: ${film.slug}`);
+
+        try {
+            await film.save();
+            console.log(`Updated film: ${film.title} with slug: ${film.slug}`);
+        } catch {
+            console.log("Film", film.title, "failed to slug!");
+            continue;
+        }
     }
 
     console.log('Finished adding slugs to films.');
     mongoose.connection.close();
 };
 
-addSlugsToTVShows();
+// addSlugsToTVShows();
 addSlugsToFilms();
