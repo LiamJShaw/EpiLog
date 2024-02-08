@@ -13,11 +13,24 @@ const User = require('./models/user');
 const userRoutes = require('./routes/userRoutes');
 const tvRoutes = require('./routes/tvRoutes');
 const filmRoutes = require('./routes/filmRoutes');
+const tvListRoutes = require('./routes/tvListRoutes');
+const filmListRoutes = require('./routes/filmListRoutes');
 
 const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json()); 
+
+// Error handler for JSON Syntax Error
+app.use((err, req, res, next) => {
+    // Check for syntax error or any other type of bodyParser error
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        // console.error(err);
+        return res.status(400).json({ status: 400, message: 'Bad request. The JSON payload is malformed.' }); // Bad request
+    }
+    // If it's not a SyntaxError, pass it to the next error handler
+    next(err);
+});
 
 const session = require('express-session');
 
@@ -84,9 +97,11 @@ passport.deserializeUser((id, done) => {
 
 
 // Use routes
-app.use('/api/user', userRoutes)
 app.use('/api/tv', tvRoutes);
 app.use('/api/film', filmRoutes);
+app.use('/api/user', userRoutes)
+app.use('/api/user/tvlist', tvListRoutes);
+app.use('/api/user/filmlist', filmListRoutes);
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

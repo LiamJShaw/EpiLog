@@ -8,8 +8,18 @@ const userSchema = new Schema({
     email: { type: String, required: true },
     role: { type: String, required: true, default: 'user' },
     bio: { type: String },
-    tvList: [{ type: Schema.Types.ObjectId, ref: 'TVShow' }],
-    filmList: [{ type: Schema.Types.ObjectId, ref: 'Film' }]
+    tvList: [{ type: Schema.Types.ObjectId, ref: 'TVListItem' }],
+    filmList: [{ type: Schema.Types.ObjectId, ref: 'FilmListItem' }],
+    favouriteTVShows: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TVShow',
+        max: 20 // You can enforce the cap in your application logic
+    }],
+    favouriteFilms: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Film',
+        max: 20 // You can enforce the cap in your application logic
+    }],
 });
 
 // Password hash middleware

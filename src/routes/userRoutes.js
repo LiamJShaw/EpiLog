@@ -5,10 +5,6 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const TVShow = require('../models/tvShow');
-
-const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb');
 
 const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
@@ -52,32 +48,6 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// Add a TV show to the user's list
-router.post('/addshow', passport.authenticate('jwt', { session: false }), async (req, res) => {
-    const userId = req.user.id;
-    const tvShowId = new ObjectId(req.body.tvShowId); // Convert string to ObjectId using MongoDB's ObjectId
-
-    try {
-        // Check if the TV Show exists
-        const tvShow = await TVShow.findById(tvShowId);
-        if (!tvShow) {
-            return res.status(404).json({ message: 'TV show not found!' });
-        }
-
-        // Find the user and update their tvList
-        const user = await User.findByIdAndUpdate(userId, {
-            $addToSet: { tvList: tvShowId }
-        }, { new: true }).populate('tvList'); // Populate to return updated list
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found!' });
-        }
-
-        res.status(200).json({ message: 'TV show added to your list!', tvList: user.tvList });
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
 
 
 // Protected route example. Must be logged in to view.
@@ -96,6 +66,5 @@ router.get('/protected', passport.authenticate('jwt', { session: false }), (req,
 router.get('/admin', passport.authenticate('jwt', { session: false }), isAdmin, (req, res) => {
     res.json({ message: 'Welcome Admin!' });
 });
-
 
 module.exports = router;
