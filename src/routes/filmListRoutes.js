@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb');
 
 const User = require('../models/user');
-
 const FilmListItem = require('../models/filmListItem');
 const Film = require('../models/film');
 

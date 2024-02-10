@@ -34,7 +34,17 @@ const tvListItemSchema = new Schema({
         type: Number,
         default: 0
     }
-});
+}, {
+    toJSON: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+      },
+    },
+    toObject: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+    }}
+  });
 
 tvListItemSchema.index({ tvShow: 1 });
 

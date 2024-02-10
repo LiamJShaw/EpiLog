@@ -1,14 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb');
 
 const User = require('../models/user');
 const TVListItem = require('../models/tvListItem');
-const FilmListItem = require('../models/filmListItem');
 const TVShow = require('../models/tvShow');
-const Film = require('../models/film');
 
 // Get user's TV list
 router.get('/', passport.authenticate('jwt', { session: false }), async (req, res) => {

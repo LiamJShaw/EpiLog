@@ -24,7 +24,17 @@ const filmSchema = new mongoose.Schema({
     status: String,
     tagline: String,
     updated: Date
-});
+}, {
+    toJSON: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+      },
+    },
+    toObject: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+    }}
+  });
 
 // Pre-save middleware to generate slug before saving
 filmSchema.pre('save', function(next) {

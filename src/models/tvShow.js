@@ -24,7 +24,17 @@ const tvShowSchema = new mongoose.Schema({
     updated: Number,
     language: String,
     imdbId: String
-});
+}, {
+    toJSON: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+      },
+    },
+    toObject: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+    }}
+  });
 
 // Pre-save middleware to generate slug before saving
 tvShowSchema.pre('save', function(next) {

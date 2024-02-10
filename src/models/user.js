@@ -19,8 +19,18 @@ const userSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Film',
         max: 20 // You can enforce the cap in your application logic
-    }],
-});
+    }]
+}, {
+    toJSON: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+      },
+    },
+    toObject: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+    }}
+  });
 
 // Password hash middleware
 userSchema.pre('save', function(next) {

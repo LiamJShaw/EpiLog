@@ -19,7 +19,17 @@ const filmListItemSchema = new Schema({
         type: Number,
         default: 0
     }
-});
+}, {
+    toJSON: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+      },
+    },
+    toObject: {
+      transform: function(doc, ret) {
+        delete ret.__v;
+    }}
+  });
 
 const FilmListItem = mongoose.model('FilmListItem', filmListItemSchema);
 

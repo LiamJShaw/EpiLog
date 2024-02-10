@@ -48,6 +48,55 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+// User profile
+router.get('/:userID/profile', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found!' });
+        }
+
+        res.status(200).json({ userProfile: user });
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// User profile accessible by anyone, but gets more info with a valid JWT for that user
+router.get('/profile/:userId', passport.authenticate('jwt', { session: false, failWithError: true }), async (req, res, next) => {
+    const profileUserId = req.params.userId; // ID from the URL
+
+    try {
+        const userDoc = await User.findById(profileUserId, '-password'); //.lean(); // Use lean() for performance if you don't need a full Mongoose document
+
+        const user = userDoc.toObject();
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found!' });
+        }
+
+        // Determine if the current user is viewing their own profile
+        const viewingOwnProfile = req.user && req.user.id === profileUserId;
+
+        if (viewingOwnProfile) {
+            // The user is viewing their own profile, return full info
+            res.status(200).json({ userProfile: user });
+        } else {
+            // The user is viewing someone else's profile, sanitise accordingly
+            delete user.email; 
+            // delete user.anyOtherSensitiveFields; // Example of removing private information
+
+            res.status(200).json({ userProfile: user });
+        }
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+
 
 
 // Protected route example. Must be logged in to view.
