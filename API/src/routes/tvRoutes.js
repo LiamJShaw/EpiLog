@@ -56,24 +56,6 @@ router.get('/search', async (req, res) => {
     }
 });
 
-// GET /api/tvshows/:slug
-router.get('/by-slug/:slug', async (req, res) => {
-    const { slug } = req.params;
-
-    try {
-        // Fetch information from the local database using the slug
-        const tvShows = await TVShow.find({ slug });
-
-        if (!tvShows.length) {
-            return res.status(404).send('TV show not found.');
-        }
-
-        res.json(tvShows);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
 // GET /api/tvshows/:id/
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
