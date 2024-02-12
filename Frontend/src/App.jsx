@@ -1,16 +1,14 @@
-import logo from './logo.svg';
 import styles from './App.module.css';
+
+import Header from '../src/components/Header';
+import TVList from '../src/components/TV-Card';
 
 function App() {
   return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          EpiLog : COMING SOON
-        </p>
-      </header>
-    </div>
+    <>
+      <Header />
+      <TVList />
+    </>
   );
 }
 
