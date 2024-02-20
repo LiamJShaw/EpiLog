@@ -38,7 +38,7 @@ app.use(session({
   secret: process.env.EPILOG_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: !true } // set to true when using https
+  cookie: { secure: true } // set to true when using https
 }));
 
 // MongoDB connection
@@ -72,7 +72,7 @@ passport.use(new JwtStrategy({
   secretOrKey: process.env.EPILOG_SECRET
 }, async (jwtPayload, done) => {
   try {
-      const user = await User.findById(jwtPayload.id); // Use async/await here
+      const user = await User.findById(jwtPayload.id);
       if (user) {
           return done(null, user);
       } else {
@@ -103,6 +103,6 @@ app.use('/api/user', userRoutes)
 app.use('/api/user/tvlist', tvListRoutes);
 app.use('/api/user/filmlist', filmListRoutes);
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port ${port}`);
 });

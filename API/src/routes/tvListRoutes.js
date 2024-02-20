@@ -6,18 +6,17 @@ const User = require('../models/user');
 const TVListItem = require('../models/tvListItem');
 const TVShow = require('../models/tvShow');
 
-// Get user's TV list
-router.get('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
-    const userId = req.user.id;
+// Get a user's TV list
+router.get('/:userID/list', passport.authenticate('jwt', { session: false, failWithError: true }), async (req, res) => {
+    const { userID } = req.params;
 
     try {
-        const user = await User.findById(userId).populate({
+        const user = await User.findById(userID).populate({
             path: 'tvList',
-            populate: { // Deep populate to get TV show details
+            populate: {
                 path: 'tvShow',
-                select: 'title' // Gets only the show title
-                // select: 'title genres' // Can do more like this
-            } 
+                select: 'title genres averageRuntime'
+            }
         });
 
         if (!user) {
